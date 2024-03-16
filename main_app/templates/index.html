@@ -1,0 +1,84 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Text Files Merger</title>
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <meta name="csrf-token" content="{{ csrf_token }}">
+</head>
+<body>
+    <div class="container">
+        <h1 class="headline">Text Files Merger</h1>
+        
+        <form id="mergeForm" class="form-container">
+            {% csrf_token %}
+            <input type="file" id="fileInput" name="files" multiple webkitdirectory directory hidden>
+            <button type="button" id="chooseFilesButton">Choose Files</button>
+            <div id="selectedFiles" class="selected-files"></div>
+            <button type="submit" id="mergeFilesButton">Merge Files</button>
+        </form>
+
+        <script>
+            document.getElementById('mergeForm').addEventListener('submit', function(event) {
+                event.preventDefault();  // Prevent the default form submission
+                uploadFiles();  // Call the function to upload files via AJAX
+            });
+            
+            let selectedFilesArray = [];  // Store selected files
+            let wrappedFilesArray = selectedFilesArray.map(file => ({
+                file: file,
+                path: file.webkitRelativePath || file.name
+            }));
+            
+            document.getElementById('fileInput').addEventListener('change', function() {
+                selectedFilesArray.push(...this.files);
+                document.getElementById('chooseFilesButton').textContent = 'Add More Files';
+                displaySelectedFiles();
+            });
+            
+            document.getElementById('chooseFilesButton').addEventListener('click', function() {
+                document.getElementById('fileInput').click();
+            });
+            
+            function displaySelectedFiles() {
+                const selectedFilesDiv = document.getElementById('selectedFiles');
+                selectedFilesDiv.innerHTML = '';
+                selectedFilesArray.forEach(file => {
+                    const fileDetails = document.createElement('div');
+                    fileDetails.textContent = `${file.webkitRelativePath} (${(file.size / 1024).toFixed(2)} KB)`;
+                    selectedFilesDiv.appendChild(fileDetails);
+                });
+            }
+
+            
+            async function uploadFiles() {
+                const formData = new FormData();
+                selectedFilesArray.forEach(file => {
+                    formData.append('files', file, file.webkitRelativePath || file.name);
+                });
+            
+                const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
+            
+                try {
+                    const response = await fetch('/merge/', {
+                        method: 'POST',
+                        headers: {
+                            'X-CSRFToken': csrfToken,
+                        },
+                        body: formData,
+                        credentials: 'include',
+                    });
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    window.location.href = '/merge_results/';
+                } catch (error) {
+                    console.error('There was a problem with the fetch operation:', error);
+                }
+            }
+        </script>
+    </div>
+</body>
+</html>

@@ -1,0 +1,89 @@
+{% load static %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="{% static 'css/style.css' %}">
+    <title>Merged Content</title>
+</head>
+<body>
+    <h1><a href="/">Merged Content</a></h1>
+    <button id="copy-button" onclick="copyToClipboard()">Copy to Clipboard</button>
+
+    <script id="copyToClipboard">
+        // This function copies the merged content to the clipboard
+        function copyToClipboard() {
+            var mergedContent = document.getElementById("mergedContent");
+            var range = document.createRange();
+            range.selectNodeContents(mergedContent);
+            var selection = window.getSelection();
+            selection.removeAllRanges();
+            selection.addRange(range);
+            document.execCommand("copy");
+            selection.removeAllRanges();
+            
+            // Change button text to "Copied!" temporarily
+            var copyButton = document.getElementById("copy-button");
+            copyButton.textContent = "Copied!";
+            setTimeout(function() {
+                copyButton.textContent = "Copy to Clipboard";
+            }, 2000); 
+        }
+        
+    </script>
+
+    <pre id="mergedContent">{{ merged_content|safe }}</pre>
+
+<!-- 
+    <script>
+        // This function checks if files are selected before merging additional files
+        document.getElementById('mergeAdditionalFilesButton').addEventListener('click', function() {
+            var filesInput = document.getElementById('additionalFiles');
+            var errorMessage = document.getElementById('fileError');
+            
+            if (filesInput.files.length === 0) {
+                errorMessage.style.display = 'block'; 
+                setTimeout(function() {
+                    errorMessage.style.opacity = '0';
+                }, 2000);
+            } else {
+                uploadAdditionalFiles(filesInput.files);
+            }
+        });
+        
+        // This function uploads additional files via AJAX
+        function getCSRFToken() {
+        const csrfTokenMeta = document.querySelector('meta[name="csrf-token"]');
+        return csrfTokenMeta ? csrfTokenMeta.getAttribute('content') : '';
+    }
+
+    // This function uploads additional files via AJAX
+    function uploadAdditionalFiles(files) {
+        var formData = new FormData();
+        for (var i = 0; i < files.length; i++) {
+            formData.append('additional_files', files[i]);
+        }
+
+        fetch('/add_files/', {
+            method: 'POST',
+            body: formData,
+            headers: {
+                'X-CSRFToken': getCSRFToken()  // Include CSRF token in headers
+            },
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.success) {
+                // Update merged content if merge is successful
+                document.getElementById('mergedContent').textContent = data.merged_content;
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    }
+    </script> -->
+
+</body>
+</html>
