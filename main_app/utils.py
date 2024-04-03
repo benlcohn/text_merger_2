@@ -7,7 +7,7 @@ logging.basicConfig(level=logging.INFO, format='%(asctime)s - %(name)s - %(level
 logger = logging.getLogger(__name__)
 
 class TextFilesMerger:
-    def merge(self, files, no_duplicates=False):
+    def merge(self, files, rel_paths=None, no_duplicates=False):
         logger.info("Starting file merge process")
         merged_content = ""
         separator = "\n------------------###------------------\n"
@@ -17,8 +17,8 @@ class TextFilesMerger:
             logger.warning("No files provided for merging")
             return merged_content
 
-        for file in files:
-            file_path = file.name  # This now includes the directory structure due to the changes on the client side
+        for file, rel_path in zip(files, rel_paths or []):
+            file_path = rel_path  # This now includes the directory structure due to the changes on the client side
             bold_filename = f'<b>{file_path}</b>'  # Wrap the file path with <b> tags to make it bold
             logger.info(f"Processing file: {bold_filename}")
             try:

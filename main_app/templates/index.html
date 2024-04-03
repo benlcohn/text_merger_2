@@ -27,10 +27,6 @@
             });
             
             let selectedFilesArray = [];  // Store selected files
-            let wrappedFilesArray = selectedFilesArray.map(file => ({
-                file: file,
-                path: file.webkitRelativePath || file.name
-            }));
             
             document.getElementById('fileInput').addEventListener('change', function() {
                 selectedFilesArray.push(...this.files);
@@ -55,8 +51,10 @@
             
             async function uploadFiles() {
                 const formData = new FormData();
-                selectedFilesArray.forEach(file => {
-                    formData.append('files', file, file.webkitRelativePath || file.name);
+                selectedFilesArray.forEach((file, index) => {
+                    formData.append('files', file);  // Just append the file
+                    const relPath = file.webkitRelativePath || file.name;  // Determine the relative path
+                    formData.append(`relPaths[${index}]`, relPath);  // Append the relative path as a separate field
                 });
             
                 const csrfToken = document.querySelector('meta[name="csrf-token"]').getAttribute('content');
